@@ -1,0 +1,54 @@
+# AlphaMissense on BUB1B: the child's missense allele in context.
+# Generated 2026-10-20 by scripts/alphamissense_bub1b.py from the public AlphaFold DB tables.
+# Reproduce: python3 scripts/alphamissense_bub1b.py --download data/reference/alphamissense
+
+AlphaMissense scores for BUB1B (UniProt O60566). Public table, no data from the child.
+amino-acid changes in the table: 19,950  (1,050 residues x 19)
+changes reachable by one nucleotide change: 6,940 nucleotide-level rows
+
+1. THE SCORE
+   p.Asn1002Lys = 0.9229  (class: LPath)
+   the nucleotide-level table lists chr15:40220612 T>G as N1002K: yes, score 0.9229
+   96.0th percentile of the 6,940 one-nucleotide changes in BUB1B
+   95.7th percentile of the 1,914 one-nucleotide changes in residues 766-1050
+   91.5th percentile of all 19,950 changes (1,686 score higher)
+
+2. THE SAME-SITE LADDER (all 19 changes at residue 1002, highest first)
+    1. W  0.9830
+    2. F  0.9605
+    3. P  0.9501
+    4. E  0.9372
+    5. K  0.9229   <-- lysine
+    6. Q  0.9073
+    7. R  0.8859
+    8. I  0.8808
+    9. M  0.8715
+   10. V  0.8707
+   11. A  0.8698
+   12. L  0.7985
+   13. C  0.7936
+   14. G  0.7836
+   15. D  0.7452
+   16. Y  0.7327
+   17. T  0.7235
+   18. H  0.6051
+   19. S  0.3477
+   18 of 19 changes at residue 1002 score above the developers' cutoff of 0.564; median 0.871; lysine is rank 5 of 19
+   mean over the 19 changes = 0.82, higher than 92% of residues in BUB1B
+   Reading: the position is scored as intolerant to almost any change. Most of the 0.92 comes from the position, not from lysine.
+
+3. WHAT THE CLINGEN-CALIBRATED BANDS WOULD SAY (Bergquist 2025, Table 1)
+   0.9229 falls in the band 'PP3_moderate' (+2 points).
+   The developers' own cutoff (0.564) is below the lowest evidence band (0.792), so the tool's 'likely pathogenic' label is not an ACMG strength.
+   We do NOT use this as a criterion: ClinGen asks for one tool to be chosen before the variant is looked at, and we did not do that. See the report, section 5.
+
+4. THE TOOL ON ALLELES WITH A LABORATORY MEASUREMENT (Suijkerbuijk 2010, PMID 20516114)
+   allele     score  class   ClinGen band      laboratory result
+   R727C     0.2381  LBen    indeterminate     low abundance in patient cells
+   R814H     0.2205  LBen    indeterminate     low abundance in patient cells
+   L844F     0.2917  LBen    indeterminate     poorly expressed, not functional
+   I909T     0.4506  Amb     indeterminate     poorly expressed; function restored when overexpressed
+   L1012P    0.8720  LPath   PP3_supporting    poorly expressed; function restored when overexpressed
+   Q921H     0.4913  Amb     indeterminate     indistinguishable from wild type
+   4 of the 5 alleles with low protein abundance score below the developers' cutoff (R727C, R814H, L844F, I909T).
+   Reading: a high score supports damage, but a low score would not have ruled it out. The tool does not say how much BubR1 protein is left.

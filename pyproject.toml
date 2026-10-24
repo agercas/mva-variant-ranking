@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mva-variant-ranking"
+version = "0.1.0"
+description = "Variant prediction analysis for the Rare Disease, Real Kid: MVA Hackathon 2026"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "CC-BY-4.0" }
+# The analysis scripts use only the Python standard library plus bcftools, minimap2,
+# samtools and bbmap on the command line. Two scripts need extra packages (below).
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.5",
+    # scripts/methods_xlsx_to_md.py turns the filled methods workbook into Markdown.
+    "openpyxl>=3.1",
+]
+# Only for scripts/n1002_geometry.py (protein structure model).
+structure = ["biopython>=1.83"]
+# Only for the mitochondrial screen, which streams the raw reads.
+genomics = [
+    "mappy>=2.31",
+    "requests>=2.31",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+src = ["src", "tests", "scripts"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "SIM", "RUF"]
+ignore = [
+    "E501",   # line length is handled by the formatter
+    "N818",
+    "RUF002",
+    "RUF003",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["B011"]

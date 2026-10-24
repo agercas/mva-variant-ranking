@@ -1,0 +1,19 @@
+# Residue N1002 in the public AlphaFold model of BubR1.
+# Generated 2026-10-20 by scripts/n1002_geometry.py. Reproduce: python3 scripts/n1002_geometry.py --download data/reference/alphafold
+
+AlphaFold model AF-O60566-F1-model_v6.pdb (public; a prediction, not a measurement)
+
+N1002: accessible surface 27.7 A^2, relative solvent accessibility 0.14
+  the 16 Asn residues in 766-1050 have median relative accessibility 0.41; 12 of 16 are more exposed than N1002
+  model confidence (pLDDT) at residue 1002: 91.1
+
+distance from N1002 side chain (ND2) to the K795 side chain (NZ): 31.1 A
+distance between the alpha carbons of N1002 and T1008: 10.7 A
+
+polar contacts of N1002 within 3.3 A (outside residues 1001-1003):
+  O    -- ASN 1004 ND2  3.14 A
+  ND2  -- VAL 998 O    2.83 A
+  ND2  -- TRP 978 O    2.95 A
+  OD1  -- TRP 978 N    2.83 A
+4 contacts, 3 of them to backbone atoms. Lysine has no side-chain oxygen, so it
+cannot accept the hydrogen bond that the asparagine side-chain oxygen takes from a backbone N-H.

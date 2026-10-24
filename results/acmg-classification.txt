@@ -1,0 +1,122 @@
+# Both alleles on the ACMG/AMP point scale, and what would move allele 2.
+# Generated 2026-10-21 by scripts/acmg_classify.py (no data needed). Reproduce: python3 scripts/acmg_classify.py
+
+
+==========================================================================
+ALLELE 1 - chr15:40209701 T>G
+  c.2210T>G  p.Leu737Ter  (stop-gain)
+==========================================================================
+
+  PVS1  [very_strong] COUNTED  +8
+        Stop-gain p.Leu737Ter in exon 17 of 23. The stop is 747 nucleotides
+        upstream of the last exon-exon junction (the usual rule is more than
+        50), so nonsense-mediated decay is expected. Loss of function of one
+        copy is the mechanism seen in patients: the first patients described
+        carried a truncating variant on one copy (Hanks 2004), and most
+        pathogenic BUB1B variants in ClinVar are nonsense, frameshift or
+        splice-site changes. The position was checked against the Ensembl
+        transcript.
+
+  PM2   [supporting] not counted
+        PM2 asks for absence or extreme rarity. This allele is rare but seen
+        120 times in gnomAD v4.1 (exomes and genomes), never homozygous, so
+        we do not count it. Counting it would give 9 points; the class is
+        the same.
+
+  PM3   [moderate] not counted
+        It needs the variant in trans with a pathogenic allele, and phase
+        cannot be measured in this data: the two variants are 10,911 bp
+        apart and the longest DNA fragment seen at this locus is 800 bp.
+
+  PS3   [strong] not counted
+        No laboratory test of this allele has been published.
+
+  PP5   [supporting] not counted
+        ClinVar lists it as Pathogenic/Likely pathogenic with several
+        submitters and no conflicts, which supports our reading, but ClinGen
+        no longer recommends PP5 as a criterion.
+
+  ----------------------------------------------------------------------
+  TOTAL 8 points  ->  LIKELY PATHOGENIC
+
+==========================================================================
+ALLELE 2 - chr15:40220612 T>G
+  c.3006T>G  p.Asn1002Lys  (missense)
+==========================================================================
+
+  PM2   [supporting] COUNTED  +1
+        Seen once in gnomAD v4.1 exomes (1 of 1,461,878 alleles), never
+        homozygous.
+
+  PP3   [supporting] not counted
+        ClinGen asks for ONE predictor, chosen before the variant is looked
+        at. We did not choose one in advance. The predictors also disagree
+        (see the table below). Counting any one of them would not change the
+        class: the table shows every choice leaves the allele uncertain.
+
+  PM1   [moderate] not counted
+        PM1 needs a mutational hot spot or a site known to be critical for
+        function. N1002 is in the kinase domain (UniProt 766-1050), which
+        BubR1 uses as a scaffold (it is generally regarded as a
+        pseudokinase), and no laboratory result marks this residue as
+        critical. In the AlphaFold model it is mostly buried (relative
+        solvent accessibility 0.14) and conserved (asparagine in 111 of 115
+        aligned vertebrate sequences). That makes a structural role
+        plausible. It is not the experimental evidence PM1 asks for.
+
+  PM3   [moderate] not counted
+        Same reason as allele 1: phase cannot be measured here.
+
+  PS3   [strong] not counted
+        No laboratory test of p.Asn1002Lys exists.
+
+  PP4   [supporting] not counted
+        PP4 needs a phenotype specific to a gene with a single genetic
+        cause. Mosaic variegated aneuploidy has several known genes.
+
+  ----------------------------------------------------------------------
+  TOTAL 1 points  ->  UNCERTAIN SIGNIFICANCE (VUS)
+
+==========================================================================
+WOULD A DIFFERENT PREDICTOR CHANGE THE CLASS OF ALLELE 2?
+==========================================================================
+  Total points for allele 2 if each tool had been the single tool chosen in advance:
+
+  tool              score  criterion                      total  class
+  REVEL             0.472  indeterminate (no criterion)       1  UNCERTAIN SIGNIFICANCE (VUS)
+  VEST4             0.433  BP4_supporting                     0  UNCERTAIN SIGNIFICANCE (VUS)
+  PolyPhen-2        0.997  PP3_supporting                     2  UNCERTAIN SIGNIFICANCE (VUS)
+  SIFT              0.000  PP3_moderate                       3  UNCERTAIN SIGNIFICANCE (VUS)
+  AlphaMissense    0.9229  PP3_moderate                       3  UNCERTAIN SIGNIFICANCE (VUS)
+
+  Whatever the choice, allele 2 stays a VUS (highest total: 3 points; Likely pathogenic starts at 6).
+
+==========================================================================
+WHAT WOULD LIFT ALLELE 2 OUT OF 'UNCERTAIN'
+==========================================================================
+  Allele 2 starts at 1 point(s). Each line adds to that base.
+  PM3 uses the 2015 default weights; ClinGen's newer per-case PM3 scoring is not applied.
+
+  ONE further piece of evidence:
+    +1  a calibrated predictor, chosen in advance, at Supporting (PP3)   ->  2 points  UNCERTAIN SIGNIFICANCE (VUS)
+    +2  a calibrated predictor, chosen in advance, at Moderate (PP3)     ->  3 points  UNCERTAIN SIGNIFICANCE (VUS)
+    +4  a calibrated predictor, chosen in advance, at Strong (PP3)       ->  5 points  UNCERTAIN SIGNIFICANCE (VUS)
+    +2  phase shown to be in trans (PM3 Moderate)                        ->  3 points  UNCERTAIN SIGNIFICANCE (VUS)
+    +4  phase in trans, plus a second unrelated patient (PM3 Strong)     ->  5 points  UNCERTAIN SIGNIFICANCE (VUS)
+    +4  a laboratory test showing less BubR1 protein (PS3 Strong)        ->  5 points  UNCERTAIN SIGNIFICANCE (VUS)
+    +8  a laboratory test validated to Very Strong (PS3 Very Strong)     ->  9 points  LIKELY PATHOGENIC
+
+  TWO further pieces of evidence:
+    +5  phase (PM3 Strong) + a predictor at Supporting                   ->  6 points  LIKELY PATHOGENIC
+    +8  phase (PM3 Strong) + a laboratory test (PS3 Strong)              ->  9 points  LIKELY PATHOGENIC
+    +8  a predictor at Strong + a laboratory test (PS3 Strong)           ->  9 points  LIKELY PATHOGENIC
+
+  ----------------------------------------------------------------------
+  Result:
+    No single piece of evidence at its default strength is enough. Phase alone
+    is not enough, and neither is a laboratory test. The routes that work are a
+    laboratory test validated to Very Strong, or two pieces together, for
+    example phase at Strong with a predictor or a laboratory test (see above).
+    Phase is still the most informative single experiment, and it needs parents'
+    samples or long reads. This data set cannot supply it (longest fragment seen
+    at the locus 800 bp; the variants are 10,911 bp apart).

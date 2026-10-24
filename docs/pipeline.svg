@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1538" width="1000" role="img" aria-label="How the analysis narrows 4.7 million variants to two">
+<style>text{font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;fill:#1b2b27}.h{font-size:17px;font-weight:700}.l{font-size:11px;font-weight:700;fill:#1f6f5c;letter-spacing:.06em}.t{font-size:13px}.big{font-size:26px;font-weight:700;fill:#ffffff}.sm{font-size:12px;fill:#ffffff}</style>
+<rect width="1000" height="1538" rx="12" fill="#f6f8f6"/>
+<text x="24" y="40" class="h" style="font-size:22px">From 4.7 million variants to two</text>
+<text x="24" y="66" class="t">Each step shows the tool, what it does, why it is there, and how many variants or genes are left. Step numbers match docs/WALKTHROUGH.md.</text>
+<rect x="24" y="96" width="952" height="158" rx="10" fill="#ffffff" stroke="#cfd8d3"/>
+<rect x="24" y="96" width="190" height="158" rx="10" fill="#1f6f5c"/>
+<rect x="194" y="96" width="20" height="158" fill="#1f6f5c"/>
+<text x="40" y="151.0" class="sm" style="opacity:.85">STEP 1</text>
+<text x="40" y="185.0" class="big">4,740,790</text>
+<text x="40" y="207.0" class="sm">variants</text>
+<text x="238" y="126" class="h">Get the data</text>
+<text x="238" y="150" class="l">TOOL</text>
+<text x="296" y="150" class="t">hf download (gated Hugging Face dataset)</text>
+<text x="238" y="175" class="l">DOES</text>
+<text x="296" y="175" class="t">Downloads the child&#x27;s variant calls (VCF) that passed the sequencing lab&#x27;s</text>
+<text x="296" y="192" class="t">filters.</text>
+<text x="238" y="217" class="l">WHY</text>
+<text x="296" y="217" class="t">The starting point. No gene, disease or clinical feature is used yet.</text>
+<path d="M119 254 v26" stroke="#1f6f5c" stroke-width="3"/>
+<path d="M112 274 l7 8 l7 -8" fill="none" stroke="#1f6f5c" stroke-width="3"/>
+<rect x="24" y="288" width="952" height="175" rx="10" fill="#ffffff" stroke="#cfd8d3"/>
+<rect x="24" y="288" width="190" height="175" rx="10" fill="#1f6f5c"/>
+<rect x="194" y="288" width="20" height="175" fill="#1f6f5c"/>
+<text x="40" y="351.5" class="sm" style="opacity:.85">STEP 3</text>
+<text x="40" y="385.5" class="big">15,965</text>
+<text x="40" y="407.5" class="sm">damaging variants</text>
+<text x="238" y="318" class="h">Predict the damage</text>
+<text x="238" y="342" class="l">TOOL</text>
+<text x="296" y="342" class="t">bcftools csq + Ensembl gene models</text>
+<text x="238" y="367" class="l">DOES</text>
+<text x="296" y="367" class="t">Works out what each variant does to the protein: stop, frameshift, splice</text>
+<text x="296" y="384" class="t">change, amino-acid swap.</text>
+<text x="238" y="409" class="l">WHY</text>
+<text x="296" y="409" class="t">Only changes to the protein can break a gene. One chromosome at a time keeps</text>
+<text x="296" y="426" class="t">disk use small.</text>
+<path d="M119 463 v26" stroke="#1f6f5c" stroke-width="3"/>
+<path d="M112 483 l7 8 l7 -8" fill="none" stroke="#1f6f5c" stroke-width="3"/>
+<rect x="24" y="497" width="952" height="175" rx="10" fill="#ffffff" stroke="#cfd8d3"/>
+<rect x="24" y="497" width="190" height="175" rx="10" fill="#1f6f5c"/>
+<rect x="194" y="497" width="20" height="175" fill="#1f6f5c"/>
+<text x="40" y="560.5" class="sm" style="opacity:.85">STEP 4</text>
+<text x="40" y="594.5" class="big">175 → 27</text>
+<text x="40" y="616.5" class="sm">genes</text>
+<text x="238" y="527" class="h">Rank the genes</text>
+<text x="238" y="551" class="l">TOOL</text>
+<text x="296" y="551" class="t">rank_biallelic_genes.py with gnomAD v4.1 and ClinVar</text>
+<text x="238" y="576" class="l">DOES</text>
+<text x="296" y="576" class="t">Drops common, badly mapped or uneven calls (682 variants stay), then scores</text>
+<text x="296" y="593" class="t">genes that have damage on both copies.</text>
+<text x="238" y="618" class="l">WHY</text>
+<text x="296" y="618" class="t">A recessive disease needs both copies hit. BUB1B ranks 1st; without the</text>
+<text x="296" y="635" class="t">ClinVar labels it is 41st.</text>
+<path d="M119 672 v26" stroke="#1f6f5c" stroke-width="3"/>
+<path d="M112 692 l7 8 l7 -8" fill="none" stroke="#1f6f5c" stroke-width="3"/>
+<rect x="24" y="706" width="952" height="175" rx="10" fill="#ffffff" stroke="#cfd8d3"/>
+<rect x="24" y="706" width="190" height="175" rx="10" fill="#1f6f5c"/>
+<rect x="194" y="706" width="20" height="175" fill="#1f6f5c"/>
+<text x="40" y="769.5" class="sm" style="opacity:.85">STEP 5, 7</text>
+<text x="40" y="803.5" class="big">2</text>
+<text x="40" y="825.5" class="sm">variants in BUB1B</text>
+<text x="238" y="736" class="h">Confirm the two variants</text>
+<text x="238" y="760" class="l">TOOL</text>
+<text x="296" y="760" class="t">a codon-table script we wrote, minimap2, SpliceAI, exon depth</text>
+<text x="238" y="785" class="l">DOES</text>
+<text x="296" y="785" class="t">Recomputes each protein change from the reference, re-calls from the raw</text>
+<text x="296" y="802" class="t">reads, looks for a splice change, a deleted exon or an upstream variant.</text>
+<text x="238" y="827" class="l">WHY</text>
+<text x="296" y="827" class="t">Do not trust one annotator or one aligner. A hidden second hit would change</text>
+<text x="296" y="844" class="t">the answer.</text>
+<path d="M119 881 v26" stroke="#1f6f5c" stroke-width="3"/>
+<path d="M112 901 l7 8 l7 -8" fill="none" stroke="#1f6f5c" stroke-width="3"/>
+<rect x="24" y="915" width="952" height="175" rx="10" fill="#ffffff" stroke="#cfd8d3"/>
+<rect x="24" y="915" width="190" height="175" rx="10" fill="#1f6f5c"/>
+<rect x="194" y="915" width="20" height="175" fill="#1f6f5c"/>
+<text x="40" y="978.5" class="sm" style="opacity:.85">STEP 5, 6</text>
+<text x="40" y="1012.5" class="big">no other</text>
+<text x="40" y="1034.5" class="sm">recessive genotype</text>
+<text x="238" y="945" class="h">Test other explanations</text>
+<text x="238" y="969" class="l">TOOL</text>
+<text x="296" y="969" class="t">ClinVar sweep, 43-gene panel, aneuploidy and mitochondrial scans, disease-</text>
+<text x="296" y="986" class="t">first and feature-first checks</text>
+<text x="238" y="1011" class="l">DOES</text>
+<text x="296" y="1011" class="t">Looks at all 6 pathogenic variants in the genome, competing diagnoses, X, Y,</text>
+<text x="296" y="1028" class="t">mitochondria, whole-chromosome gains and losses.</text>
+<text x="238" y="1053" class="l">WHY</text>
+<text x="296" y="1053" class="t">Shows what else could explain the child, so BUB1B is not just the first hit.</text>
+<path d="M119 1090 v26" stroke="#1f6f5c" stroke-width="3"/>
+<path d="M112 1110 l7 8 l7 -8" fill="none" stroke="#1f6f5c" stroke-width="3"/>
+<rect x="24" y="1124" width="952" height="192" rx="10" fill="#ffffff" stroke="#cfd8d3"/>
+<rect x="24" y="1124" width="190" height="192" rx="10" fill="#1f6f5c"/>
+<rect x="194" y="1124" width="20" height="192" fill="#1f6f5c"/>
+<text x="40" y="1196.0" class="sm" style="opacity:.85">STEP 8</text>
+<text x="40" y="1230.0" class="big">LP  and  VUS</text>
+<text x="40" y="1252.0" class="sm">allele 1 and allele 2</text>
+<text x="238" y="1154" class="h">Interpret the variants</text>
+<text x="238" y="1178" class="l">TOOL</text>
+<text x="296" y="1178" class="t">acmg_classify.py, AlphaMissense table, AlphaFold model, REVEL / VEST4 /</text>
+<text x="296" y="1195" class="t">PolyPhen-2 / SIFT</text>
+<text x="238" y="1220" class="l">DOES</text>
+<text x="296" y="1220" class="t">Adds up ACMG evidence points (allele 1: 8, allele 2: 1), reads AlphaMissense</text>
+<text x="296" y="1237" class="t">(0.9229, moderate) and measures how buried the changed residue is.</text>
+<text x="238" y="1262" class="l">WHY</text>
+<text x="296" y="1262" class="t">Grades how strong the evidence is for each allele. Allele 2 stays a VUS</text>
+<text x="296" y="1279" class="t">whichever single predictor is used.</text>
+<path d="M119 1316 v26" stroke="#1f6f5c" stroke-width="3"/>
+<path d="M112 1336 l7 8 l7 -8" fill="none" stroke="#1f6f5c" stroke-width="3"/>
+<rect x="24" y="1350" width="952" height="158" rx="10" fill="#ffffff" stroke="#cfd8d3"/>
+<rect x="24" y="1350" width="190" height="158" rx="10" fill="#1f6f5c"/>
+<rect x="194" y="1350" width="20" height="158" fill="#1f6f5c"/>
+<text x="40" y="1405.0" class="sm" style="opacity:.85">STEP 9</text>
+<text x="40" y="1439.0" class="big">5 rows</text>
+<text x="40" y="1461.0" class="sm">ranked file</text>
+<text x="238" y="1380" class="h">Write the predictions</text>
+<text x="238" y="1404" class="l">TOOL</text>
+<text x="296" y="1404" class="t">build_track1_submission.py</text>
+<text x="238" y="1429" class="l">DOES</text>
+<text x="296" y="1429" class="t">Writes the CSV, checks the format and scores it against three possible</text>
+<text x="296" y="1446" class="t">answers with a copy of the scorer.</text>
+<text x="238" y="1471" class="l">WHY</text>
+<text x="296" y="1471" class="t">Row 1 holds both variants; the other rows are fallbacks (report section 1).</text>
+</svg>

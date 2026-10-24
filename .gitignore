@@ -1,0 +1,12 @@
+data/
+.venv/
+*.vcf
+*.vcf.gz
+*.bam
+*.cram
+*.fastq*
+*.fq*
+__pycache__/
+.pytest_cache/
+*.egg-info/
+.ruff_cache/
