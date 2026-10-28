@@ -18,7 +18,7 @@ hpo-refs: ## Fetch HPO disease-phenotype annotations and the ontology (~65 MB)
 crosscheck: ## Candidate-gene route: disease -> known genes -> compare (needs the VCF)
 	@cd .. && $(PY) verification/crosscheck.py --public
 
-phenotype: hpo-refs ## Reverse route: does MVA1 actually match this child's features?
+phenotype: hpo-refs ## Reverse route: does MVA1 actually match the supplied HPO terms?
 	@cd .. && $(PY) verification/phenotype_reverse_check.py
 
 all: crosscheck phenotype ## Both checks, into results/

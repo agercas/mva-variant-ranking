@@ -11,16 +11,16 @@ gene the child carries a pathogenic allele in. Its own README admits the hole:
 > step is wrong and nothing here would reveal it."*
 
 Nothing tested that assumption. This script does, by running the arrow the other
-way: **take what the literature says MVA1 looks like, and compare it against what
-this child actually presents with.**
+way: **take what the literature says MVA1 looks like, and compare it against the
+HPO terms supplied with the dataset.**
 
 Two questions, and the second one can embarrass us:
 
-1. **Coverage** — of the child's HPO terms, how many appear in MVA1's published
+1. **Coverage** — of the HPO terms supplied with the dataset, how many appear in MVA1's published
    annotation? A disease explaining none of the features is the wrong disease
    however good the genotype looks.
 2. **Specificity** — rank *every* disease in HPO by phenotype similarity and see
-   where MVA1 lands. If hundreds of diseases fit the child better, the phenotype
+   where MVA1 lands. If hundreds of diseases fit the supplied terms better, the phenotype
    is not evidence *for* MVA1; it is merely not evidence against it.
 
 Similarity uses **ancestor-propagated terms with information-content weighting**.
@@ -28,7 +28,7 @@ HPO is a DAG, so a specific tumour term implies "neoplasm", and a rare term must
 count for more than a common one.
 
 All inputs are public bulk downloads read locally (HPO ``phenotype.hpoa`` and
-``hp.obo``). The child's HPO terms are the only proband-derived input. They are
+``hp.obo``). The supplied HPO terms are the only proband-derived input. They are
 read from a git-ignored file (see ``--terms``) and nothing is transmitted.
 """
 
@@ -42,17 +42,17 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 HPO_DIR = REPO / "data/reference/hpo"
 
-#: The child's own HPO term IDs, as a JSON list, e.g. ["HP:0000001", "HP:0000002"].
+#: The HPO term IDs supplied with the dataset, as a JSON list, e.g. ["HP:0000001", "HP:0000002"].
 #: The IDs come from the phenotype document in the gated dataset. They are NOT stored in
-#: this repository: the names of the child's features are published only where an argument
-#: turns on them. Labels are read from hp.obo.
+#: this repository, and their names are published only where an argument turns on them.
+#: Labels are read from hp.obo.
 TERMS_FILE = REPO / "data/private/case_terms.json"
 
-#: Some terms in the record are withheld from publication. They live in their own
-#: git-ignored file (a JSON list of HPO IDs) and are shown only under a generic label.
-#: Without that file the check still runs, on the terms in the first file only, and says so.
+#: Terms listed in a second git-ignored file (a JSON list of HPO IDs) are shown only under a
+#: generic label. Without that file the check still runs, on the terms in the first file
+#: only, and says so.
 WITHHELD_TERMS_FILE = REPO / "data/private/withheld_terms.json"
-WITHHELD_LABEL = "A withheld term"
+WITHHELD_LABEL = "A term (not shown)"
 
 
 def load_id_list(path: Path) -> list[str]:
@@ -64,19 +64,41 @@ def load_id_list(path: Path) -> list[str]:
     return [str(x) for x in json.loads(path.read_text(encoding="utf-8"))]
 
 
-#: Diseases worth naming: the MVA series, plus the differentials the main
-#: analysis had to exclude.
+#: Diseases worth naming: the MVA series and the related chromosome-instability disorders.
 WATCH: dict[str, str] = {
     "OMIM:257300": "MVA1 (BUB1B)",
     "OMIM:614114": "MVA2 (CEP57)",
     "OMIM:617598": "MVA3 (TRIP13)",
     "OMIM:620153": "MVA4 (CENATAC)",
-    "OMIM:620184": "MVA5 (SLF2)",
-    "OMIM:620185": "MVA6 (SMC5)",
-    "OMIM:218040": "Costello syndrome (HRAS) — top phenotype rival",
-    "OMIM:151623": "Li-Fraumeni (TP53) — cancer-predisposition differential",
-    "OMIM:130650": "Beckwith-Wiedemann",
+    "OMIM:620184": "Atelis syndrome 1 (SLF2)",
+    "OMIM:620185": "Atelis syndrome 2 (SMC5)",
 }
+
+#: Optional JSON object {OMIM id: label} of further diseases to track in the table below.
+#: It lives in the quarantine and is never listed in this repository; the public view drops
+#: every row that is not an MVA-related disease.
+EXTRA_WATCH_FILE = REPO / "data/private/extra_watch_diseases.json"
+
+
+def load_watch(extra: Path = EXTRA_WATCH_FILE) -> dict[str, str]:
+    """Return the diseases to track: WATCH, then any listed in the private file.
+
+    Args:
+        extra: JSON file holding an object of OMIM id -> label. An absent file adds nothing.
+
+    Returns:
+        The diseases to track, in output order. A disease in both keeps its label from WATCH.
+    """
+    watch = dict(WATCH)
+    if extra.is_file():
+        import json
+
+        loaded = json.loads(extra.read_text(encoding="utf-8"))
+        if not isinstance(loaded, dict):
+            raise ValueError(f"{extra.name} must hold a JSON object of OMIM id to label")
+        for disease, label in loaded.items():
+            watch.setdefault(str(disease), str(label))
+    return watch
 
 
 def load_ontology(path: Path) -> tuple[dict[str, set[str]], dict[str, str]]:
@@ -134,7 +156,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--hpo-dir", type=Path, default=HPO_DIR)
     ap.add_argument("--top", type=int, default=12)
-    ap.add_argument("--terms", type=Path, default=TERMS_FILE, help="JSON list of the child's HPO IDs")
+    ap.add_argument("--terms", type=Path, default=TERMS_FILE, help="JSON list of the supplied HPO IDs")
     ap.add_argument("--withheld-terms", type=Path, default=WITHHELD_TERMS_FILE)
     args = ap.parse_args()
 
@@ -147,7 +169,7 @@ def main() -> int:
     own_ids = load_id_list(args.terms)
     if not own_ids:
         print(
-            f"no HPO terms found in {args.terms}. Put the child's HPO IDs there as a JSON list, "
+            f"no HPO terms found in {args.terms}. Put the supplied HPO IDs there as a JSON list, "
             'for example ["HP:0000001"]; the file is git-ignored and is never published.'
         )
         return 1
@@ -155,8 +177,9 @@ def main() -> int:
     withheld_ids = load_id_list(args.withheld_terms)
     proband_terms.update({t: WITHHELD_LABEL for t in withheld_ids})
     if not withheld_ids:
+        # Printed to the output, not to standard error: run_all.sh discards standard error.
         print(
-            f"NOTE: no withheld-terms file at {args.withheld_terms}; running on the {len(own_ids)} terms in {args.terms.name} only."
+            f"NOTE: no second terms file was found; running on the {len(own_ids)} terms in {args.terms.name} only."
         )
     diseases, names = load_annotations(hpoa)
     print(f"ontology   : {len(labels):,} non-obsolete terms")
@@ -173,7 +196,7 @@ def main() -> int:
 
     # ---- Question 1: coverage -------------------------------------------
     print("\n" + "=" * 82)
-    print(f"QUESTION 1 — Of the child's {len(proband_terms)} features, how many does MVA1 explain?")
+    print(f"QUESTION 1 — Of the {len(proband_terms)} supplied HPO terms, how many does MVA1 explain?")
     print("=" * 82)
     mva1 = diseases.get("OMIM:257300", set())
     mva1_closed = closure.get("OMIM:257300", set())
@@ -183,7 +206,7 @@ def main() -> int:
     print("  — 'All' sits at the root. What matters is how SPECIFIC the connecting term is,")
     print("  so each row reports the information content of the link that does the work.")
     print()
-    print(f"  {'the child presents with':<32} {'link':<8} {'IC':>5}  explained via")
+    print(f"  {'HPO term supplied':<32} {'link':<8} {'IC':>5}  explained via")
     grades = {"direct": 0, "specific": 0, "generic": 0, "vacuous": 0}
     for term, label in sorted(proband_terms.items(), key=lambda kv: kv[1]):
         if term in mva1:
@@ -206,7 +229,7 @@ def main() -> int:
     useful = grades["direct"] + grades["specific"]
     print(f"\n  🔴 Link grades: {grades['direct']} direct, {grades['specific']} specific,")
     print(f"  {grades['generic']} generic, {grades['vacuous']} vacuous.")
-    print(f"  Only {useful} of {len(proband_terms)} features are matched in a way that carries")
+    print(f"  Only {useful} of {len(proband_terms)} terms are matched in a way that carries")
     print("  real information. A raw count would say every feature is explained, which is")
     print("  true and meaningless: a very general term, for example, is 'explained' only by")
     print("  the root term 'All'.")
@@ -234,7 +257,7 @@ def main() -> int:
 
     print("\n  Where the diseases that matter landed:")
     print(f"  {'rank':>7}  {'score':>7}  disease")
-    for disease, label in WATCH.items():
+    for disease, label in load_watch().items():
         if disease in ranks:
             print(f"  {ranks[disease]:>7}  {scores[ranks[disease] - 1][0]:>7.1f}  {label}")
         else:
@@ -246,19 +269,19 @@ def main() -> int:
     print("VERDICT")
     print("=" * 82)
     if not mva1_rank:
-        print("  🔴 MVA1 shares NO propagated term with this child's phenotype.")
+        print("  🔴 MVA1 shares NO propagated term with the supplied terms.")
         print("  That would be a serious problem for the call. Investigate before submitting.")
         return 0
     print(
         f"  MVA1 ranks {mva1_rank:,} of {len(scores):,} diseases sharing any feature "
         f"(top {100.0 * mva1_rank / len(scores):.1f}%),"
     )
-    print(f"  and matches {useful} of {len(proband_terms)} of the child's features informatively")
+    print(f"  and matches {useful} of the {len(proband_terms)} supplied HPO terms informatively")
     print(f"  ({grades['direct']} direct, {grades['specific']} via a specific ancestor).")
     print("\n  🔴 Phenotype similarity places MVA1 among the top diseases without singling it out;")
     print("  this script shows compatibility, and the genotype identifies the gene.")
     print("\n  What it establishes is narrower and still worth having:")
-    print("    • MVA1 is phenotypically COMPATIBLE with this child, not contradicted.")
+    print("    • MVA1 is phenotypically COMPATIBLE with the supplied terms, not contradicted.")
     print("    • No disease ranking above it is one whose gene the child also carries a")
     print("      rare damaging biallelic genotype in — which is the conjunction that")
     print("      actually identifies the answer.")

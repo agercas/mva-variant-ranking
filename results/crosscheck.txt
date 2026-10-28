@@ -11,12 +11,12 @@ gene       type         OMIM     locus      source
 BUB1B      MVA1         257300   15q15.1    Wikipedia / MedlinePlus / OMIM PS257300
 CEP57      MVA2         614114   11q21      Wikipedia / MedlinePlus / OMIM
 TRIP13     MVA3         617598   5p15       Wikipedia / MedlinePlus / OMIM
-CENATAC    MVA4         620153   11q23      Wikipedia / MedlinePlus / OMIM
-SLF2       MVA5         620184   10q24      Wikipedia / MedlinePlus / OMIM
-SMC5       MVA6         620185   9q21       Wikipedia / MedlinePlus / OMIM
-BUB1       associated   —        2q13       Wikipedia (named as associated)
+CENATAC    MVA4         620153   11q23      OMIM / ClinVar
+SLF2       ATELS1       620184   10q24      OMIM / ClinVar (Atelis syndrome 1)
+SMC5       ATELS2       620185   9q21       OMIM / ClinVar (Atelis syndrome 2)
+BUB1       MCPH30       620183   2q13       OMIM (primary microcephaly 30); named in some MVA summaries
 BUB3       associated   —        10q26      Wikipedia (named as associated)
-CEP192     reported     —        18p11      Sci Rep / ScienceDirect 2023, MVA with tetraploidy
+CEP192     reported     —        18p11      HGG Advances 2024 (PMID 37981762), MVA with tetraploidy
 
   9 genes. Taken from the literature, NOT from this repo's own panel.
 

@@ -131,6 +131,9 @@ ALLELE2 = [
 #: ClinGen-calibrated ones: Pejaver et al. 2022 (PMID 36413997) for REVEL, VEST4,
 #: PolyPhen-2 and SIFT; Bergquist et al. 2025 (PMID 40084623) for AlphaMissense.
 #: (tool, score, criterion it would give, ACMG points it would add)
+#: The VEST4 score is the value the UCSC track gave during the analysis. It does not reproduce
+#: against dbNSFP 4.8a (0.885 on the MANE transcript, which is PP3_moderate); see
+#: results/RECORDED-CHECKS.md. The class of allele 2 does not depend on it.
 PREDICTORS: list[tuple[str, str, str, int]] = [
     ("REVEL", "0.472", "indeterminate (no criterion)", 0),
     ("VEST4", "0.433", "BP4_supporting", -1),

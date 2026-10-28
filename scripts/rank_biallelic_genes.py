@@ -94,9 +94,9 @@ def most_severe(bcsq: str) -> tuple[str | None, str | None]:
     is not None: continue``, which made the outcome depend on the ORDER
     ``bcftools csq`` happened to emit transcripts in: an NMD annotation arriving
     first was accepted, because ``best`` was still None. That is not
-    hypothetical — it put ``TP53`` into the genome-wide damaging set as a
-    "frameshift" on the strength of ``ENST00000635293``, an NMD-biotype
-    transcript, when no protein-coding transcript is affected at all.
+    hypothetical — it put a gene into the genome-wide damaging set as a
+    "frameshift" on the strength of an NMD-biotype transcript, when no
+    protein-coding transcript is affected at all.
     """
     best: str | None = None
     gene: str | None = None

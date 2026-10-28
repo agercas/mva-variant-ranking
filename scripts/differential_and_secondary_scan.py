@@ -29,40 +29,59 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 
-#: Genes that a phenotype-driven reading proposes as competing diagnoses, plus
-#: every gene reported to cause MVA, plus the RASopathies that a childhood tumour
-#: and growth failure nominate. These are the hypotheses that must be excluded.
+#: The genes linked to MVA, plus the reported genes. These are named in the results. The
+#: other competing diagnoses are not listed here: they are read at run time from the
+#: git-ignored EXTRA_DIFFERENTIAL_FILE (see load_differential), and the public view counts
+#: them without naming them.
 DIFFERENTIAL: dict[str, str] = {
-    "ABCC6": "Pseudoxanthoma elasticum",
-    "ENPP1": "GACI / hypophosphataemic rickets",
-    "KCNJ1": "Bartter syndrome type 2",
-    "SLC12A1": "Bartter syndrome type 1",
-    "BSND": "Bartter syndrome type 4a",
-    "CLCNKA": "Bartter syndrome type 4b",
-    "CLCNKB": "Bartter syndrome type 3",
-    "HRAS": "Costello syndrome - blind rank 5, the strongest phenotype competitor",
-    "PTPN11": "Noonan syndrome 1",
-    "SOS1": "Noonan syndrome 4",
-    "RAF1": "Noonan syndrome 5",
-    "KRAS": "Noonan syndrome 3 / CFC",
-    "NRAS": "Noonan syndrome 6",
-    "BRAF": "CFC syndrome",
-    "MAP2K1": "CFC syndrome",
-    "SHOC2": "Noonan-like with loose anagen hair",
-    "CBL": "Noonan-like / JMML",
-    "RIT1": "Noonan syndrome 8",
     "LZTR1": "Noonan syndrome 10 (AD, missense) / 2 (AR, biallelic) / schwannomatosis (AD, LoF)",
-    "PTCH1": "Gorlin syndrome",
-    "INSR": "Donohue / Rabson-Mendenhall",
-    "MPV17": "Mitochondrial DNA depletion",
-    "VPS33B": "ARC syndrome",
-    "CDKN1C": "Beckwith-Wiedemann",
-    "NSD1": "Sotos syndrome",
     "CEP57": "MVA type 2 - the direct alternative to BUB1B",
     "TRIP13": "MVA type 3 - the direct alternative to BUB1B",
-    "BUB1": "MVA-like, reported cases",
+    "BUB1": "primary microcephaly 30; named in some MVA summaries",
     "BUB1B": "MVA type 1 - our hypothesis, printed for comparison not for credit",
 }
+
+#: Optional JSON object {gene: description} of further competing-diagnosis genes. It lives in
+#: the quarantine and is never listed in this repository.
+EXTRA_DIFFERENTIAL_FILE = REPO / "data/private/extra_differential.json"
+
+
+def load_differential(extra: Path = EXTRA_DIFFERENTIAL_FILE) -> dict[str, str]:
+    """Return the genes to check: the private extra genes first, then DIFFERENTIAL.
+
+    The private genes come first so that the first unnamed gene in the output sits where it
+    always has, and a rerun puts the summary of unnamed genes in the same place. A gene in
+    both keeps its description from DIFFERENTIAL.
+
+    Args:
+        extra: JSON file holding an object of gene symbol -> description. An absent file
+            adds nothing.
+
+    Returns:
+        The genes to check, in output order.
+    """
+    genes: dict[str, str] = {}
+    if extra.is_file():
+        import json
+
+        loaded = json.loads(extra.read_text(encoding="utf-8"))
+        if not isinstance(loaded, dict):
+            raise ValueError(f"{extra.name} must hold a JSON object of gene symbol to description")
+        genes.update({str(k): str(v) for k, v in loaded.items()})
+    genes.update(DIFFERENTIAL)
+    return genes
+
+
+def no_extra_genes_note(genes: dict[str, str]) -> str | None:
+    """Return the note to print when no gene beyond the shipped list was loaded, else None."""
+    if len(genes) > len(DIFFERENTIAL):
+        return None
+    return (
+        f"NOTE: no extra differential genes were loaded (data/private/extra_differential.json is absent "
+        f"or adds none); only the {len(genes)} genes in the script were checked, so the count of "
+        f"unnamed genes is absent."
+    )
+
 
 SEVERITY: tuple[str, ...] = (
     "stop_gained",
@@ -269,13 +288,18 @@ def main() -> int:
     print("PART 2 - the phenotype-driven differentials, with evidence")
     print("=" * 78)
 
+    differential = load_differential()
+    note = no_extra_genes_note(differential)
+    if note:
+        # Visible in the output itself: run_all.sh discards standard error.
+        print(note)
     per_gene: dict[str, list] = collections.defaultdict(list)
     for line in args.tsv.open():
         f = line.rstrip("\n").split("\t")
         if len(f) < 10:
             continue
         consequence, gene = most_severe(f[9])
-        if gene in DIFFERENTIAL:
+        if gene in differential:
             per_gene[gene].append((f[0], int(f[1]), f[2], f[3], consequence, f[5], f[6], f[8]))
 
     keys = [(c, p) for vs in per_gene.values() for c, p, *_ in vs]
@@ -304,7 +328,7 @@ def main() -> int:
             clnsig[(f[0], int(f[1]), f[2], f[3])] = f[4]
         regions.unlink(missing_ok=True)
 
-    for gene, description in DIFFERENTIAL.items():
+    for gene, description in differential.items():
         variants = per_gene.get(gene, [])
         print(f"\n{gene} — {description}")
         if not variants:

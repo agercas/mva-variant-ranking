@@ -14,7 +14,7 @@ lists every file in this repository.
 | `docs/references.md` | Every tool, dataset and paper used, with links |
 | `docs/WALKTHROUGH.md` | The steps, in order, with run times and the file each one writes |
 | `results/` | The output of every check (see "Results" below) |
-| `submission/` | The four files uploaded to the competition: predictions CSV, report, methods description (`.xlsx` and `.md`) |
+| `submission/` | The four submission files: predictions CSV, report, methods description (`.xlsx` and `.md`) |
 | `run_all.sh` | Reruns every check on a machine that has the data |
 
 ## Code
@@ -43,7 +43,7 @@ lists every file in this repository.
 | `scripts/mito_from_fastq.py` | Rebuilds the mitochondrial genome by streaming the raw reads and storing nothing | (private pileup) |
 | `scripts/mito_call_variants.py` | Calls mitochondrial variants that rise above the background noise level measured from the data | `mitochondrial-screen.txt` |
 | `verification/crosscheck.py` | Starts from the disease, takes the genes named in public sources and checks what the child carries | `crosscheck.txt` |
-| `verification/phenotype_reverse_check.py` | Ranks all diseases in HPO (the Human Phenotype Ontology) by how well they match the child's features, and reports where MVA1 falls | `phenotype-reverse-check.txt` |
+| `verification/phenotype_reverse_check.py` | Ranks all diseases in HPO (the Human Phenotype Ontology) by how well they match the supplied HPO terms, and reports where MVA1 falls | `phenotype-reverse-check.txt` |
 | `verification/Makefile` | Targets for the two checks above | |
 
 ### Interpreting the two variants (report section 5)
@@ -78,6 +78,9 @@ lists every file in this repository.
 | `tests/test_coordinates.py`, `tests/test_scoring.py`, `tests/test_submission.py` | Coordinate handling, the scorer, and the predictions file |
 | `tests/test_privacy_guard.py` | The privacy guard |
 | `tests/test_public_view.py` | The public-view tool, on synthetic text |
+| `tests/test_differential_list.py` | That only the MVA-related and reported genes are named in the script and the public view, and that extra genes load from the private file |
+| `tests/test_calibration.py` | That the calibrated bands give the right strength for benign and damaging scores |
+| `tests/test_mito_calls.py` | That the sentence after the seam artefacts follows from the calls |
 | `tests/test_verification_phenotype.py` | The reverse phenotype check, on a synthetic ontology |
 
 ## Results
@@ -97,4 +100,4 @@ lists the numbers in the report that come from runs whose output files are not y
 
 † Some result files named in `run_all.sh` (`sensitivity-sweep.txt`, `expanded-differential.txt`, `overdispersion.txt`, `roh-check.txt`, `biallelic-ranking-real-af.txt`) are written only when the pipeline is rerun on the data machine. Until then, their numbers are listed in `results/RECORDED-CHECKS.md`.
 
-The scripts read the child's genotype file from `data/private/raw/proband.vcf.gz` (or the `MVA_VCF` variable). Place or link the file there.
+The scripts read the child's genotype file from `data/private/raw/proband.vcf.gz` (or the `MVA_VCF` variable). Place or link the file there. The optional private files (`case_terms.json`, `withheld_terms.json`, `extra_differential.json`, `extra_watch_diseases.json`) live in the same folder and are named at the top of `run_all.sh`.

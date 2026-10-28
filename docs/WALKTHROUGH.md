@@ -33,8 +33,11 @@ hf download SageBio/mva-hackathon-2026-data --repo-type dataset \
 
 This download is 317 MB and holds the VCF and the phenotype document. You need the eight FASTQ files
 (about 85 GB) only for steps 7 and 8. Everything lands in `data/private/`,
-which is git-ignored. For the phenotype check (step 6), copy the child's HPO IDs from the phenotype document into `data/private/case_terms.json` as a JSON
-list.
+which is git-ignored. For the phenotype check (step 6), copy the supplied HPO IDs from the phenotype document into `data/private/case_terms.json` as a JSON
+list. Two further optional files in the same folder are named at the top of `run_all.sh`:
+`withheld_terms.json` (the rest of the supplied HPO IDs, shown under a generic label) and
+`extra_differential.json` (further genes for the competing-diagnosis check) and
+`extra_watch_diseases.json` (further diseases to track in the phenotype check).
 
 ## 2. Public references (25 minutes, about 7.7 GB)
 
@@ -81,8 +84,8 @@ that this position is not in the coding sequence.
 ## 6. The two independent routes (7 minutes)
 
 ```bash
-make crosscheck                            # from the disease: known MVA genes, then what the child carries
-make hpo-refs && make phenotype            # from the child's features: the rank of MVA1
+make crosscheck                            # from the disease: the genes public sources link to MVA, then what the child carries
+make hpo-refs && make phenotype            # from the supplied HPO terms: the rank of MVA1
 ```
 
 ## 7. Read-level checks (needs the FASTQ files)
@@ -132,7 +135,7 @@ them and they cannot import it.
 | Check | Starts from | Question |
 |---|---|---|
 | `crosscheck.py` | the disease | Takes the MVA genes named in public sources, locates them with a different gene-coordinate source and transcript model, and finds the one that carries a known pathogenic allele in the child. It tests whether the main ranking's gene and variants are reached again. |
-| `phenotype_reverse_check.py` | the child's features | Ranks every disease annotated in the Human Phenotype Ontology (HPO) by how well it matches the child's features, and reports the rank of MVA1. It tests whether the named disease is compatible with the child. |
+| `phenotype_reverse_check.py` | the supplied HPO terms | Ranks every disease annotated in the Human Phenotype Ontology (HPO) by how well it matches the supplied terms, and reports the rank of MVA1. It tests whether the named disease is compatible with the terms. |
 
 ### Check 1: starting from the disease
 
@@ -140,7 +143,7 @@ them and they cannot import it.
 python3 verification/crosscheck.py --public
 ```
 
-1. Take the gene list from Wikipedia, MedlinePlus and OMIM (nine genes).
+1. Take the gene list from public sources: Wikipedia, MedlinePlus, OMIM, ClinVar and one journal article (nine genes).
 2. Find each gene's position by symbol, through HGNC and the Ensembl REST service.
 3. Read the child's variants in each gene straight from the VCF.
 4. Ask which gene holds a variant that ClinVar classes as pathogenic or likely pathogenic.
@@ -155,15 +158,15 @@ unnoticed. Check 2 covers that gap, and the genome-wide ranking is independent o
 
 `--public` blanks the coordinates of variants that are not part of the reported finding.
 
-### Check 2: starting from the child's features
+### Check 2: starting from the supplied HPO terms
 
 ```bash
 make hpo-refs            # HPO files, public
-# put the child's HPO IDs in data/private/case_terms.json, e.g. ["HP:0000001", "HP:0000002"]
+# put the supplied HPO IDs in data/private/case_terms.json, e.g. ["HP:0000001", "HP:0000002"]
 python3 verification/phenotype_reverse_check.py
 ```
 
-The child's HPO IDs come from the phenotype document in the dataset. They are read from a
+The HPO IDs come from the phenotype document in the dataset. They are read from a
 git-ignored file and are not stored in this repository. The labels are read from `hp.obo`.
 
 HPO is a graph, so every feature connects to every disease through some ancestor, up to the root

@@ -36,6 +36,8 @@ report (section 10) has the same list in short form. Numbers such as R5 refer to
 | REVEL | v1.3 | missense score | https://sites.google.com/site/revelgenomics/ |
 | VEST4, PolyPhen-2, SIFT | through UCSC dbNSFP tracks | missense scores | https://genome.ucsc.edu |
 | GTEx | | reach of the gene's regulatory signals | https://gtexportal.org |
+| MyVariant.info | dbNSFP 4.8a, queried 2026-10-25 | the VEST4 check in section 5.3 of the report | https://myvariant.info |
+| Guo 2024, *HGG Advances* 5:100256 | | the report of MVA with *CEP192* variants, one source of the gene list in `crosscheck.py` | https://pubmed.ncbi.nlm.nih.gov/37981762/ |
 | rCRS and the GRCh38 analysis set | | mitochondrial reference; re-alignment reference | https://www.ncbi.nlm.nih.gov/nuccore/NC_012920 |
 
 Hosted prediction and structure services were used once, for the checks in R20. They are

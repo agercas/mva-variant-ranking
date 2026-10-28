@@ -3,9 +3,9 @@
 The panel has four groups: genes reported to cause mosaic variegated aneuploidy
 (MVA) or related chromosome-instability disorders, chromosome-breakage syndromes
 (Bloom, Nijmegen and similar), the Fanconi anaemia pathway, and genes that
-predispose to childhood cancers. The last three groups matter because severe
-growth restriction, short stature and a childhood solid tumour are also the
-classic presentation of the chromosome-breakage syndromes.
+predispose to childhood cancers. The last three groups matter because the
+chromosome-breakage syndromes and the cancer-predisposition genes can present
+like MVA, with growth restriction and early tumours.
 
 For each gene the script prints how many variants the child carries in the gene
 span, how many have no dbSNP ID, and which ClinVar Pathogenic/Likely-pathogenic
@@ -46,7 +46,7 @@ PANEL = {
         "ERCC4",
         "UBE2T",
     ],
-    "RMS / cancer predisposition": ["TP53", "DICER1", "NF1", "RB1", "HRAS", "PTPN11", "SMARCB1", "SMARCA4"],
+    "cancer predisposition": ["TP53", "DICER1", "NF1", "RB1", "HRAS", "PTPN11", "SMARCB1", "SMARCA4"],
 }
 WANTED = {g for v in PANEL.values() for g in v}
 

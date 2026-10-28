@@ -76,8 +76,11 @@ class Calibration:
             if bound is not None and cmp(score, bound):
                 return label
         rev = (lambda a, b: a <= b) if self.higher_is_worse else (lambda a, b: a >= b)
+        # Strongest first, as for PP3; walking weakest-first would cap every benign call at supporting.
         for bound, label in zip(
-            self.bp4, ("BP4_supporting", "BP4_moderate", "BP4_strong", "BP4_verystrong"), strict=True
+            reversed(self.bp4),
+            ("BP4_verystrong", "BP4_strong", "BP4_moderate", "BP4_supporting"),
+            strict=True,
         ):
             if bound is not None and rev(score, bound):
                 return label
@@ -88,7 +91,7 @@ CALIBRATED = {
     "REVEL": Calibration("REVEL", (0.644, 0.773, 0.932), (0.290, 0.183, 0.016, 0.003)),
     "VEST4": Calibration("VEST4", (0.764, 0.861, 0.965), (0.449, 0.302, None, None)),
     "PolyPhen2": Calibration("PolyPhen2", (0.978, 0.999, None), (0.113, 0.009, None, None)),
-    "SIFT": Calibration("SIFT", (0.001, 0.0, None), (0.327, None, None, None), higher_is_worse=False),
+    "SIFT": Calibration("SIFT", (0.001, 0.0, None), (0.080, 0.327, None, None), higher_is_worse=False),
 }
 
 #: AlphaMissense's own class boundaries are 0.34 and 0.564. They are not ACMG
@@ -281,7 +284,7 @@ def main() -> int:
     print("=" * 100)
     print(f"NEGATIVE CONTROLS — every ClinVar Benign/Likely-benign missense in BUB1B (n={len(benign)})")
     print("=" * 100)
-    print(f"{'tool':<12} {'n scored':>9} {'median':>9} {'max':>9}   {'called PP3 at any strength':>28}")
+    print(f"{'tool':<12} {'n scored':>9} {'median':>9} {'most dmg':>9}   {'called PP3 at any strength':>28}")
     for tool, cal in CALIBRATED.items():
         vals = [scores[tool][k] for k in benign if k in scores[tool]]
         if not vals:

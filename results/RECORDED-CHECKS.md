@@ -31,7 +31,7 @@ rest need the raw reads or extra downloads and have their own `make` targets.
 | R15 | Experimental structures with the same asparagine clamp | The related kinases Drosophila BubR1 (PDB 6JKK, 6JKM) and human BUB1 (PDB 6F7B, 4QPM, 5DMZ) | open the PDB entries and measure the contacts of the equivalent Asn |
 | R16 | gnomAD variant co-occurrence service | Returns "not available for gnomAD v4"; on a control pair in an unrelated gene with nobody carrying both variants it returns `p_compound_heterozygous = 1`, which is the service having nothing to fit | a GraphQL `variant_cooccurrence` query on two public variants |
 | R17 | Run time and hardware | About 55 minutes wall clock from the VCF to the predictions file on 4 vCPU, 16 GB RAM and 30 GB disk, most of it downloading references (run September 2026 (earlier package)) | `time ./run_all.sh` on such a machine |
-| R18 | Reach of the gene's regulatory signals | Public GTEx maps list 8 independent expression-controlling (eQTL) signals for BUB1B between 0.78 Mb upstream and 0.84 Mb downstream, and 153 splicing signals out to 1 Mb. The window we searched (61 kb before the gene start to 49 kb after its end) excludes 6 of the 8. Later work found no genome-wide-significant blood eQTL for the gene and most of the signals are in testis, so the missed signals are probably weak and tissue-specific | GTEx portal, gene BUB1B (the script is not part of this repository) |
+| R18 | Reach of the gene's regulatory signals | Public GTEx maps list 8 independent expression-controlling (eQTL) signals for BUB1B between 0.78 Mb upstream and 0.84 Mb downstream of the transcription start site, and 153 splicing signals out to 1 Mb. The window we searched (61 kb before the gene start to 49 kb after its end) excludes 6 of the 8. A later GTEx v8 check (2026-10-25) found no Whole_Blood signal and only one testis signal among the eight (the strongest, p = 5e-17, inside the searched window, as is a signal in EBV-transformed lymphocytes, p = 1.2e-5); the six outside the window are in cerebellum (three), tibial artery, oesophagus mucosa and skin, with p-values from 4e-5 to 2e-10, all weaker than the testis signal. Tissue specificity was not tested | GTEx portal, gene BUB1B (the script is not part of this repository) |
 | R19 | Aneuploidy screens | Allele-balance spread is higher on chromosomes 20, 21, 22 (and 9 and 17), attributed to repeats, low mappability and pericentromeric regions, with no two-peaked pattern; overdispersion of allele balance over 2,087,774 sites is 1.27 times the binomial expectation and tracks chromosome GC content (Spearman 0.72, p < 0.001); chromosome 20's excess is confined to 20 to 40 Mb. No copy-neutral loss of heterozygosity on 15q (median heterozygous fraction 0.068 against 0.067 genome-wide) (run 2026-09-14 and 2026-10-15) | `make overdispersion` and `make roh` |
 | R20 | Protein language models and structure predictors on p.Asn1002Lys | 12 language models (ESM2 35M to 3B, ESM1b, ESM-1v five seeds, ESM-C) put the change between the 14th and 79th percentile of damage for this gene (median 41st); lysine is among the mildest changes at the site in every model. Four structure predictors (Boltz-2, OpenFold3, ESMFold v1, ESMFold2) return the unchanged fold and show only the lost hydrogen bonds; none separated labelled disease alleles or synthetic damaging controls from neutral ones, so none is used as evidence (run 2026-10-15 to 2026-10-16) | research code from the Track 2 work, not included here |
 | R21 | The first mitochondrial pass with a fixed 2% cutoff | 1,044 variants: 10 homoplasmic and 1,034 low-level, two of which matched ClinVar pathogenic records. All were sequencing error or copies of mitochondrial sequence in the nucleus. The final run (`mitochondrial-screen.txt`) sets the floor from the data at 21.2% and counts 555 positions above 2% at its depth filter (run 2026-09-21) | `make mito-extract && make mito-call`, then lower the floor to 2% |
@@ -44,6 +44,49 @@ two sentences changed to the wording the script now prints; `completeness-audit.
 `acmg-classification.txt` have one sentence each reworded to the scripts' current text;
 `differential-exclusion.txt` has its conclusion line reworded (no gene is completed by
 ClinVar-listed pathogenic variants alone); `biallelic-ranking.txt` has one comment reworded.
+
+A further round of hand edits, made without the data, brought these files in line with
+scripts whose text or logic changed. No result value changed in any of them (label numbers such as an OMIM id and a PMID
+were added to `crosscheck.txt`), and each now says so in its own header:
+`phenotype-reverse-check.txt` (the rows of diseases that are not MVA-related are withheld; the supplied HPO terms are no longer called the child's
+features; the SLF2 and SMC5 rows are labelled Atelis syndrome 1 and 2, as OMIM and ClinVar
+name them), `crosscheck.txt` (the same gene labels, the BUB1 label, the source column for
+CENATAC, and the CEP192 reference, which is Guo 2024, *HGG Advances*, PMID 37981762),
+`differential-exclusion.txt` (the BUB1 description, and the competing diagnoses other than the MVA-related genes, which are
+counted and no longer named: the unnamed count went from 12 to 24, with each newly hidden gene counted in the category the
+public view gives it), `insilico-panel.txt` (the control column
+that shows the most damaging value was labelled "max", and for SIFT that value is the
+minimum; and the Gln467His row, where the REVEL and VEST4 calls are BP4 Moderate and not
+BP4 Supporting, because `Calibration.strength` walked the benign bounds weakest-first and
+capped every benign call at Supporting) and `mitochondrial-screen.txt` (a sentence that said
+no calls were heteroplasmic, which the counts above it did not support; the file now gives the 12 calls that remain
+after the 5 seam artefacts, but not their split into homoplasmic and sub-homoplasmic, which the current script prints).
+Section 8.3 of the report was changed to match the counts in that file. Regenerating these
+files on the data machine replaces the hand edits.
+
+## Known open items
+
+* **VEST4.** The values used for the VEST4 column of `insilico-panel.txt`, `acmg_classify.py`
+  and the report (0.433 for p.Asn1002Lys, 0.983 for p.Leu1012Pro, 0.231 for p.Gln467His) do
+  not reproduce against dbNSFP 4.8a as served by MyVariant.info (downloaded 2025-01-17): it
+  returned 0.885 and 0.841, 0.901 and 0.960, and 0.305 and 0.201 on 2026-10-25, for the
+  MANE transcript and the second transcript. The other four predictors reproduce exactly.
+  The cause was not determined (a release difference is one possibility; it was not tested).
+  One thing to check:
+  `load_vest` takes the position of the MANE transcript in the track's "all-ids" column and
+  uses it to index the score list after dropping "." entries, which would misalign the index
+  if any score were missing. `make insilico-refs` fetches the UCSC track without a version,
+  so re-running it does not pin the source. The class of allele 2 does not depend on VEST4
+  (3 points at most), but the text that says VEST4 leans benign does.
+* **Optional private files.** `differential-exclusion.txt` counts the competing-diagnosis
+  genes that are not named. That count (24 in the committed file) needs `data/private/extra_differential.json`
+  (a JSON object of gene symbol to description), which holds every competing-diagnosis gene except the MVA-related
+  ones and is not in this repository on purpose. The phenotype check can likewise track further diseases from
+  `data/private/extra_watch_diseases.json` (a JSON object of OMIM id to label); the public view hides those rows.
+  Without it the script checks only the genes listed in the script and prints a note in the
+  output. The "8 terms" in `phenotype-reverse-check.txt` need both `data/private/case_terms.json`
+  and `data/private/withheld_terms.json`. A gene symbol that is misspelt in `extra_differential.json`
+  prints as "no damaging variants", because the script cannot tell a typo from a clean gene.
 
 ## To close this list
 

@@ -29,7 +29,7 @@ so the ranking needs ClinVar to identify the gene.
 We then tested the answer. We searched the gene and a 170 kb window for a second variant (splice, exon
 deletion, upstream region), and checked all other ClinVar pathogenic variants, named competing diagnoses,
 a 43-gene panel, X, Y, mitochondria and whole-chromosome aneuploidy. We also worked backward from the
-disease and from the child's features. These checks found one explanation. We graded the two variants with the
+disease and from the supplied HPO terms. These checks found one explanation. We graded the two variants with the
 ACMG rules (the standard guidelines for classifying variants): allele 1 is likely pathogenic and allele 2 is a
 variant of uncertain significance. AlphaMissense scores allele 2 as likely pathogenic (0.92), and PolyPhen-2 and SIFT agree; under ClinGen's calibration these scores give a predictor at most 2 points, 3 with the rarity point, against the 6 needed, so allele 2 stays a variant of uncertain significance.
 
@@ -40,7 +40,7 @@ changes. A flow diagram is at the top of [`docs/WALKTHROUGH.md`](docs/WALKTHROUG
 
 ## Secondary findings
 
-A genome-wide search of ClinVar pathogenic and likely pathogenic records found five variants besides the *BUB1B* stop-gain, each heterozygous with good read support. One, in *LZTR1*, is reported as a secondary finding in the predictions file and the report (section 7), because ClinVar links it to a condition that overlaps the child's presentation. The other four lie in genes unrelated to the child's features and stay unreported.
+A genome-wide search of ClinVar pathogenic and likely pathogenic records found five variants besides the *BUB1B* stop-gain, each heterozygous with good read support. One, in *LZTR1*, is reported as a secondary finding in the predictions file and the report (section 7), because ClinVar links it to a condition that overlaps the child's presentation. The other four lie in genes unrelated to the condition and stay unreported.
 
 ## Files
 
@@ -79,8 +79,8 @@ any single-sample GRCh38 VCF.
 
 The results describe the child as far as the argument needs. `scripts/public_view.py`
 withholds the genotypes of genes other than the reported ones, the rsIDs of common variants,
-the names of the child's clinical features and the list of mitochondrial variants. A rerun with the data
-produces the same redacted files.
+the names of the supplied HPO terms, the names of the competing diagnoses other than the genes linked to MVA, and the list of mitochondrial variants. A rerun with the data
+and the private files named at the top of `run_all.sh` produces redacted files of the same form.
 
 ## AI use
 

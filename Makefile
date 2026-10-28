@@ -200,7 +200,7 @@ hpo-refs: ## Fetch HPO disease-phenotype annotations and the ontology (~65 MB)
 crosscheck: ## Candidate-gene route: disease -> known genes -> compare (needs the VCF and network)
 	$(MAKE) -C verification crosscheck
 
-phenotype: ## Reverse route: does MVA1 match the child's features? (needs data/private/case_terms.json)
+phenotype: ## Reverse route: does MVA1 match the supplied HPO terms? (needs data/private/case_terms.json)
 	$(MAKE) -C verification phenotype
 
 # ------------------------------------------------------ the submission file ---

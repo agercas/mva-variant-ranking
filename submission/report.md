@@ -1,5 +1,9 @@
 # Report: a compound heterozygous *BUB1B* genotype in PROBAND01
 
+> **This report is a research hypothesis.** Its findings need confirmation in an accredited
+> diagnostic laboratory before clinical use, and clinical decisions rest with the treating
+> team and the family.
+
 ---
 
 ## Summary
@@ -39,8 +43,8 @@ rows (sections 1 and 6.1).
 * A stop on one copy plus an amino-acid swap on the other is the pattern published for
   MVA1 patients (section 5.2).
 * Computational predictors flag allele 2 as damaging: AlphaMissense scores it 0.9229 (likely
-  pathogenic), and PolyPhen-2 and SIFT agree. REVEL gives no evidence and VEST4 leans benign.
-  For these scores ClinGen's calibration gives one predictor at most 2 points. With 1 point for
+  pathogenic), and PolyPhen-2 and SIFT agree. REVEL gives no evidence and VEST4 leans benign on the value used here (see the caveat in
+  section 5.3). For these scores ClinGen's calibration gives one predictor at most 2 points. With 1 point for
   rarity that makes 3, and Likely pathogenic needs 6, so the formal grade stays VUS (sections 5.3
   and 8.1).
 
@@ -177,7 +181,7 @@ position come from our own analysis of the genome.
    diagnoses, a 43-gene panel, chromosomes X and Y, the mitochondrial genome and a
    whole-chromosome aneuploidy screen.
 8. **The other direction.** We worked from the disease to its known genes, and from the
-   child's features to all diseases.
+   supplied HPO terms to all diseases.
 9. **Verification.** We re-derived the effect of each variant by hand and re-called both
    variants from the raw reads with a different aligner (R7).
 10. **Classification.** We graded both variants with the ACMG rules and asked what would
@@ -214,7 +218,7 @@ The work went through four stages, in this order. The first three each changed a
 | Genome-wide ranking | Steps 1 to 4 with the initial filter thresholds, using "no dbSNP ID" as a proxy for rare | *BUB1B* first of 209 genes, with a stop-gain and a missense variant. The ranking in `biallelic-ranking.txt`, which adds the annotation fix and the allele-balance filter described below but keeps the proxy, gives 175 genes | The proxy agreed with real gnomAD frequencies in only 35.7% of cases on chromosome 15 |
 | Corrected ranking | Real gnomAD frequencies, a fix for an annotation bug (9.1% of records were never protein-changing) and an allele-balance filter | The candidate pool shrank from 209 to 48, 40 and then 27 genes; *BUB1B* stayed first at all 108 threshold settings | The ranking depends on ClinVar (4.1) |
 | Search of the gene | Variants in a 170 kb window, splice scores, exon depth, upstream regulatory region, re-calling from raw reads | Exon depth, splice scores and the upstream region all looked normal. Both calls held up (allele fractions 0.543 and 0.517) | Phase is undetermined with this library (6.2) |
-| Search for other explanations | Other pathogenic variants genome-wide, named competing diagnoses, a 43-gene panel, X, Y, mitochondria, aneuploidy; working from the disease and from the child's features | One explanation. The features fit MVA1 and fit other diseases too | None; the answer stood |
+| Search for other explanations | Other pathogenic variants genome-wide, named competing diagnoses, a 43-gene panel, X, Y, mitochondria, aneuploidy; working from the disease and from the supplied HPO terms | One explanation. The terms fit MVA1 and fit other diseases too | None; the answer stood |
 
 `MANIFEST.md` lists the script and output file for each step.
 
@@ -232,7 +236,10 @@ The work went through four stages, in this order. The first three each changed a
 | The same ranking with ClinVar labels removed | **41st** of 175 |
 
 The genotype pattern narrows 4.7 million variants to 175 candidate genes. The ranking needs the
-ClinVar label on allele 1, which names MVA1, to put *BUB1B* first.
+ClinVar label on allele 1, which names MVA1, to put *BUB1B* first. The 108 combinations vary the
+filters only. The pattern scores (100 for a homozygous loss of function, 85 for a stop plus a
+missense) and the ClinVar bonus (30) were not varied, and *BUB1B* is first only while the bonus
+exceeds 15.
 
 ### 4.2 The two variants
 
@@ -288,10 +295,11 @@ exons; smaller deletions inside an exon need other methods.
   (`biallelic-ranking.txt`, section 5.3). Section 7 describes the other five. The sweep covers
   variants ClinVar already lists.
 * **Competing diagnoses.** The genes for the two diseases that rank above MVA1 on phenotype,
-  and the genes for the other conditions we considered, hold no damaging variant or only variants
+  and the genes for the other conditions we considered (not named here; `differential-exclusion.txt` gives the counts), hold no damaging variant or only variants
   that ClinVar calls benign or likely benign. *LZTR1* is the exception (section 7). One of the
-  other genes carries a variant that ClinVar has not classified. The other known MVA genes
-  (*CEP57*, *TRIP13*, *BUB1*, *CENATAC*, *SLF2*, *SMC5*) hold no ClinVar pathogenic variant
+  other genes carries a variant that ClinVar has not classified. The other genes linked to MVA
+  or to related chromosome-instability disorders (*CEP57*, *TRIP13*, *CENATAC*, *SLF2*, *SMC5*;
+  and *BUB1*, which OMIM links to primary microcephaly) hold no ClinVar pathogenic variant
   (`crosscheck.txt`). Imprinting changes need methylation testing.
 * **A 43-gene panel** of MVA, chromosome-breakage, Fanconi pathway and cancer-predisposition
   genes: *BUB1B* is the only gene in which the child carries a ClinVar pathogenic or likely
@@ -311,22 +319,22 @@ exons; smaller deletions inside an exon need other methods.
   gain is absent from both (R19). We attribute these values to artefacts; that is an inference
   that direct tests have yet to confirm.
 
-### 4.5 The child's clinical features and MVA1
+### 4.5 The supplied HPO terms and MVA1
 
 The dataset comes with 8 HPO terms. The numbers below use all 8 as supplied.
 
 * We ranked all 12,867 diseases in HPO by how well their annotated features match the terms,
   giving more weight to rare features. MVA1 ranks **3rd**. Two diseases rank
   above it, and the child carries no damaging variant in either gene.
-* We graded each link between a feature and MVA1 by how specific the connecting HPO term is,
-  because every term shares the ontology root with every disease. Two features are annotated on
+* We graded each link between a term and MVA1 by how specific the connecting HPO term is,
+  because every term shares the ontology root with every disease. Two terms are annotated on
   MVA1 directly. One more connects through a specific term, and two connect through general
-  terms. MVA1 therefore accounts for 5 of the 8 features,
-  3 of them informatively. The other three are very general features, shared with most diseases
+  terms. MVA1 therefore accounts for 5 of the 8 terms,
+  3 of them informatively. The other three are very general terms, shared with most diseases
   (`phenotype-reverse-check.txt`).
 
-The child's features are compatible with MVA1 and support it weakly. The three very general
-features need no separate explanation.
+The supplied terms are compatible with MVA1 and support it weakly. The three very general
+terms need no separate explanation.
 
 ### 4.6 Starting from the disease
 
@@ -430,7 +438,7 @@ laboratory result marks it as critical.
 
 **Computational predictors flag allele 2 as damaging.** AlphaMissense (a deep-learning model
 built on AlphaFold) scores p.Asn1002Lys 0.9229 and labels it likely pathogenic. PolyPhen-2
-(0.997) and SIFT (0.000) agree. REVEL (0.472) gives no evidence and VEST4 (0.433) leans benign.
+(0.997) and SIFT (0.000) agree. REVEL (0.472) gives no evidence and VEST4 (0.433, but see the caveat below) leans benign.
 The structure points the same way (5.1). Section 8.1 examines the AlphaMissense score.
 
 ClinGen turns each score into ACMG points through calibrated bands (Pejaver 2022 for REVEL,
@@ -446,6 +454,15 @@ grade stays VUS:
 | PolyPhen-2 | 0.997 | for pathogenic, supporting (+1) | 2 |
 | SIFT | 0.000 | for pathogenic, moderate (+2) | 3 |
 | AlphaMissense | 0.9229 | for pathogenic, moderate (+2) | 3 |
+
+The VEST4 value above is the one the UCSC dbNSFP track returned during the analysis. A later
+check on 2026-10-25 against dbNSFP 4.8a, as served by MyVariant.info, returned 0.885 (0.841 on
+a second transcript), which falls in the Moderate pathogenic band of Pejaver 2022 (Table 2:
+0.861 to 0.965). With that value the VEST4 row would total 3 points, not 0, and four of the five
+predictors would flag the variant. The other four scores reproduce. The cause of the
+difference was not determined. The conclusion does not change, because the highest total stays
+at 3 points, but the VEST4 value and the sentence "VEST4 leans benign" need to be traced to
+their source before they are relied on.
 
 Among the five, the highest total is 3 points and Likely pathogenic starts at 6
 (`acmg-classification.txt`). The strongest band any calibrated predictor reaches is Strong (+4),
@@ -603,9 +620,10 @@ position at a median of 1,609 times. A fixed 2% cutoff for low-level variants li
 "variants", two of which matched pathogenic records (R21). They were sequencing error and
 copies of mitochondrial sequence in the nucleus. At this coverage a fixed cutoff is arbitrary, so
 we set it from the measured noise: the 99.9th percentile of the background, 21.2%, where a 2%
-cutoff would admit 555 positions (`mitochondrial-screen.txt`). The variants that remain are the
-common ones that define a mitochondrial lineage, and six universal positions served as a positive
-control. The method calls variants down to about 21%.
+cutoff would admit 555 positions (`mitochondrial-screen.txt`). Seventeen positions lie above that
+floor (10 homoplasmic, 7 sub-homoplasmic); five of them sit within 25 bases of the circular origin,
+where alignment artefacts pile up. Six universal positions served as a positive control. The method
+calls variants down to about 21%.
 
 ### 8.4 ClinVar classifies few of this gene's missense variants
 
@@ -637,7 +655,7 @@ submission covers candidate medicines and carries its own disclaimer.
 
 ## 9. Reproducibility, scalability, privacy and use of AI
 
-**Code.** The repository holds the 24 scripts, 5 package modules and 7 test files that produced
+**Code.** The repository holds the 24 scripts, 5 package modules and 10 test files that produced
 the results. `MANIFEST.md` lists each file and what it does. The analysis
 scripts use the Python standard library plus `bcftools`, `minimap2`, `samtools` and `bbmap`.
 `./run_all.sh` regenerates the results on a machine with the data. `make check` runs the
@@ -657,10 +675,11 @@ single-sample GRCh38 VCF.
 
 **Privacy.** Variant-effect annotation, ClinVar, gnomAD and the predictors ran against bulk
 public files that we downloaded in full and queried on the local machine. The gnomAD browser and
-Ensembl received the identifiers of the two reported variants and the secondary finding; the
-structure and language-model services named under "Use of generative AI" received public
-identifiers and a small number of candidate sites. Results that describe the child pass through `scripts/public_view.py`, which
-withholds other genes' genotypes, rsIDs, feature names and mitochondrial positions. The repository holds
+Ensembl received the identifiers of the two reported variants and the secondary finding; MyVariant.info
+received the coordinates of the missense variant (allele 2) and of two reference variants for the VEST4
+check in section 5.3; the hosted structure and language-model services (NVIDIA NIM, Biohub ESM and ColabFold, for the
+checks in R20) received a protein sequence and a small number of candidate sites. Results that describe the child pass through `scripts/public_view.py`, which
+withholds other genes' genotypes, rsIDs, term names and mitochondrial positions. The repository holds
 code and aggregate results. All copies of the data will be deleted within 30 days of the end of
 the competition.
 

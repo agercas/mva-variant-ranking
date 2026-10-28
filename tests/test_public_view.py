@@ -52,7 +52,7 @@ Heterozygous single P/LP alleles:
   LZTR1      22:20996720 C>G GT=0/1 DP=48  not_provided|Other_disease
 
 PART 2 - differentials
-GENEA — Some syndrome - blind rank 1 (kidney, growth)
+GENEA — Some syndrome - blind rank 1 (synthetic note)
    no damaging variants at all  →  EXCLUDED at the genotype level
 
 GENEB — Another syndrome
@@ -60,7 +60,10 @@ GENEB — Another syndrome
    missense       GT=1/1 rs2222222      ClinVar=Benign   [coords redacted]
    all 2 are ClinVar-benign common polymorphisms  →  EXCLUDED
 
-HRAS — Costello syndrome
+CEP57 — MVA type 2
+   no damaging variants at all  →  EXCLUDED at the genotype level
+
+GENEC — A third syndrome (synthetic note)
    no damaging variants at all  →  EXCLUDED at the genotype level
 
 BUB1B — hypothesis
@@ -73,12 +76,32 @@ def test_differential_drops_rsids_genotypes_and_unnamed_genes() -> None:
     assert out.returncode == 0, out.stderr
     assert "rs1111111" not in out.stdout and "rs2222222" not in out.stdout
     assert "GENEA" not in out.stdout and "GENEB" not in out.stdout
-    assert "kidney" not in out.stdout
-    assert "2 further named competing diagnoses (genes not named): 1 have no damaging variant" in out.stdout
+    assert "synthetic note" not in out.stdout  # notes on unreported genes are dropped, named or not
+    assert "GENEC" not in out.stdout and "third syndrome" not in out.stdout
+    assert "CEP57 — MVA type 2" in out.stdout  # the genes linked to MVA stay named
+    assert "3 further named competing diagnoses (genes not named): 2 have no damaging variant" in out.stdout
     assert "1 carry only variants that ClinVar calls benign" in out.stdout
-    assert "HRAS — Costello syndrome" in out.stdout
     assert "BUB1B" in out.stdout and "LZTR1" in out.stdout
     assert "DP=46" in out.stdout
+
+
+def test_differential_handles_a_gene_symbol_of_an_unusual_shape() -> None:
+    text = DIFFERENTIAL + (
+        "\nHLA-A — Another syndrome\n"
+        "   missense       GT=0/1 rs3333333      ClinVar=Benign   [coords redacted]\n"
+    )
+    out = view("differential", text)
+    assert out.returncode == 0, out.stderr
+    assert "HLA-A" not in out.stdout and "rs3333333" not in out.stdout
+    assert "4 further named competing diagnoses" in out.stdout
+
+
+def test_differential_refuses_rather_than_pass_a_genotype_through() -> None:
+    """A block whose head is not recognised must stop the view, not leak its variant lines."""
+    text = DIFFERENTIAL + "\nunrecognised head\n   missense       GT=0/1 rs4444444      ClinVar=Benign\n"
+    out = view("differential", text)
+    assert out.returncode == 2
+    assert "rs4444444" not in out.stdout and "refusing to pass the text through" in out.stderr
 
 
 MITO = """\
@@ -104,12 +127,19 @@ def test_mito_view_keeps_the_floor_and_drops_positions() -> None:
 
 
 PHENOTYPE = """\
-  the child presents with          link        IC  explained via
+  HPO term supplied                link        IC  explained via
   Feature one                      DIRECT     1.7  (annotated)
   Feature two                      SPECIFIC   6.2  Some ancestor
 
   Link grades: 1 direct, 1 specific.
 """
+
+
+def test_phenotype_view_refuses_when_the_term_table_is_not_found() -> None:
+    """The header is present somewhere, but not where the redaction looks: the names must not be printed."""
+    out = view("phenotype", PHENOTYPE.replace("  HPO term supplied", "| HPO term supplied"))
+    assert out.returncode == 2
+    assert "Feature one" not in out.stdout
 
 
 def test_phenotype_view_hides_the_term_names() -> None:
@@ -124,15 +154,33 @@ def test_phenotype_view_keeps_only_named_diseases_in_the_ranking() -> None:
         PHENOTYPE
         + """
    rank    score  disease
-      1     56.9  Costello syndrome
+      1     56.9  Synthetic Rival Syndrome
       2     50.0  Some Unnamed Syndrome
       3     54.8  Mosaic variegated aneuploidy syndrome 1   <-- BUB1B
 """
     )
     out = view("phenotype", text)
     assert out.returncode == 0, out.stderr
-    assert "Unnamed" not in out.stdout and "Costello" in out.stdout
-    assert "(other diseases withheld)" in out.stdout
+    assert "Unnamed" not in out.stdout and "Synthetic Rival" not in out.stdout  # however high it ranks
+    assert "Mosaic variegated aneuploidy syndrome 1" in out.stdout
+    assert out.stdout.count("(other diseases withheld)") == 1  # two adjacent dropped rows, one marker
+
+
+def test_phenotype_view_keeps_the_atelis_rows_the_check_labels() -> None:
+    """The reverse check labels SLF2 and SMC5 as Atelis syndrome 1 and 2; the view must keep them."""
+    text = (
+        PHENOTYPE
+        + """
+   rank    score  disease
+   8445      1.3  Atelis syndrome 1 (SLF2)
+   9525      0.4  Atelis syndrome 2 (SMC5)
+      2     50.0  Some Unnamed Syndrome
+"""
+    )
+    out = view("phenotype", text)
+    assert out.returncode == 0, out.stderr
+    assert "Atelis syndrome 1 (SLF2)" in out.stdout and "Atelis syndrome 2 (SMC5)" in out.stdout
+    assert "Unnamed" not in out.stdout
 
 
 COMPLETENESS = """\

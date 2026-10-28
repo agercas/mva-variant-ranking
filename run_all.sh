@@ -11,7 +11,12 @@
 # make target and each writes its own file in results/:
 #   make gnomad-af              # real gnomAD frequencies for every contig: adds the tighter ranking
 #   make hpo-refs               # HPO files for the phenotype check
-#   data/private/case_terms.json  # the child's HPO IDs, one JSON list (never published)
+#   data/private/case_terms.json  # the supplied HPO IDs, one JSON list (never published)
+#   data/private/withheld_terms.json  # HPO IDs shown under a generic label, one JSON list (never published); the report's
+#                                     # 8 terms need this file and case_terms.json, and without it the output says so
+#   data/private/extra_differential.json  # needed for the count of unnamed competing-diagnosis genes in differential-exclusion.txt;
+#                                         # without it the output says so. {gene: description} (never published)
+#   data/private/extra_watch_diseases.json  # optional: further diseases to track in the phenotype check, {OMIM id: label}; the public view drops them
 #   make insilico-refs && make insilico        -> insilico-panel.txt
 #   make family-calibration                    -> family-calibration.txt
 #   make mito-extract R1=... R2=... && make mito-call   -> mitochondrial-screen.txt (view: mito)
@@ -119,10 +124,10 @@ emit_public completeness-audit.txt completeness "Attacks the edges of the claim 
   python3 scripts/completeness_audit.py --public
 
 step "8/10  independent cross-checks"
-emit crosscheck.txt "Disease first: known MVA genes, then what the child carries. Independent of the ranking." \
+emit crosscheck.txt "Disease first: the genes public sources link to MVA, then what the child carries. Independent of the ranking." \
   python3 verification/crosscheck.py --public
 if [ -s data/reference/hpo/hp.obo ] && [ -s data/private/case_terms.json ]; then
-  emit_public phenotype-reverse-check.txt phenotype "Does MVA1 match the child's features?" \
+  emit_public phenotype-reverse-check.txt phenotype "Does MVA1 match the supplied HPO terms?" \
     python3 verification/phenotype_reverse_check.py
 else
   echo "    skipping the phenotype check: needs 'make hpo-refs' and data/private/case_terms.json"

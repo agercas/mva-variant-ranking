@@ -71,19 +71,23 @@ class MvaGene:
 #: from this repository's own gene panel — the point is to start where a clinician
 #: with a search engine would start.
 #:
-#: Wikipedia "Mosaic variegated aneuploidy syndrome" and MedlinePlus give MVA1-6
-#: with types, loci and OMIM numbers, and name BUB1 and BUB3 as associated.
-#: CEP192 comes from a 2023 report of MVA with tetraploidy.
+#: Wikipedia "Mosaic variegated aneuploidy syndrome" gives MVA1-6 with types, loci and
+#: OMIM numbers and names BUB1 and BUB3 as associated (not re-read; MedlinePlus lists
+#: only BUB1B, CEP57 and TRIP13). OMIM and ClinVar list SLF2 and SMC5 as Atelis syndrome 1 and 2 (620184, 620185) and BUB1 as
+#: primary microcephaly 30 (620183); the labels below follow OMIM.
+#: CEP192 comes from a report of MVA with tetraploidy (Guo 2024, HGG Advances, PMID 37981762).
 MVA_GENES: tuple[MvaGene, ...] = (
     MvaGene("BUB1B", "MVA1", "257300", "15q15.1", "Wikipedia / MedlinePlus / OMIM PS257300"),
     MvaGene("CEP57", "MVA2", "614114", "11q21", "Wikipedia / MedlinePlus / OMIM"),
     MvaGene("TRIP13", "MVA3", "617598", "5p15", "Wikipedia / MedlinePlus / OMIM"),
-    MvaGene("CENATAC", "MVA4", "620153", "11q23", "Wikipedia / MedlinePlus / OMIM"),
-    MvaGene("SLF2", "MVA5", "620184", "10q24", "Wikipedia / MedlinePlus / OMIM"),
-    MvaGene("SMC5", "MVA6", "620185", "9q21", "Wikipedia / MedlinePlus / OMIM"),
-    MvaGene("BUB1", "associated", "—", "2q13", "Wikipedia (named as associated)"),
+    MvaGene("CENATAC", "MVA4", "620153", "11q23", "OMIM / ClinVar"),
+    MvaGene("SLF2", "ATELS1", "620184", "10q24", "OMIM / ClinVar (Atelis syndrome 1)"),
+    MvaGene("SMC5", "ATELS2", "620185", "9q21", "OMIM / ClinVar (Atelis syndrome 2)"),
+    MvaGene(
+        "BUB1", "MCPH30", "620183", "2q13", "OMIM (primary microcephaly 30); named in some MVA summaries"
+    ),
     MvaGene("BUB3", "associated", "—", "10q26", "Wikipedia (named as associated)"),
-    MvaGene("CEP192", "reported", "—", "18p11", "Sci Rep / ScienceDirect 2023, MVA with tetraploidy"),
+    MvaGene("CEP192", "reported", "—", "18p11", "HGG Advances 2024 (PMID 37981762), MVA with tetraploidy"),
 )
 
 

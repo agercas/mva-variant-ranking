@@ -81,6 +81,25 @@ def clinvar_mt_pathogenic() -> dict[tuple[int, str, str], str]:
     return hits
 
 
+def remaining_calls_sentence(rest: list[tuple]) -> str:
+    """Say how many calls remain once the seam artefacts are set aside, and how many are not homoplasmic.
+
+    Args:
+        rest: The calls left after the seam artefacts were removed, as
+            ``(position, ref, alt, fraction, depth)`` tuples.
+
+    Returns:
+        One sentence that follows "Excluding them,".
+    """
+    sub_homoplasmic = [c for c in rest if c[3] < 0.95]
+    if sub_homoplasmic:
+        return (
+            f"{len(rest)} calls remain: {len(rest) - len(sub_homoplasmic)} homoplasmic and "
+            f"{len(sub_homoplasmic)} sub-homoplasmic (below 95%)."
+        )
+    return f"every remaining call is homoplasmic: {len(rest)} variants."
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--pileup", type=Path, default=REPO / "data/private/work/mito_pileup.json")
@@ -160,8 +179,8 @@ def main() -> int:
     # The molecule is circular but the reference is linear, so reads spanning the
     # origin are clipped and pile up mismatches in the first and last few bases.
     # Anything within ORIGIN_EDGE of either end is an alignment artefact of that
-    # seam, not biology - and it is exactly what the sub-homoplasmic calls here
-    # turn out to be.
+    # seam, not biology - and it can account for some or all of the sub-homoplasmic
+    # calls; the counts printed below say how many remain.
     origin_edge = 25
     for pos, ref, alt, frac, depth in calls:
         near_origin = pos <= origin_edge or pos > len(ref_seq) - origin_edge
@@ -170,11 +189,8 @@ def main() -> int:
     seam = [c for c in calls if c[0] <= origin_edge or c[0] > len(ref_seq) - origin_edge]
     if seam:
         print(f"\n  {len(seam)} of {len(calls)} calls sit within {origin_edge} bp of the circular")
-        print("  origin and are discounted as seam artefacts. Excluding them, every")
-        print(
-            f"  remaining call is homoplasmic: {len([c for c in calls if c not in seam])} variants, "
-            "no genuine heteroplasmy at all."
-        )
+        print("  origin and are discounted as seam artefacts. Excluding them,")
+        print(f"  {remaining_calls_sentence([c for c in calls if c not in seam])}")
 
     # ---- positive control -------------------------------------------------
     print("\n" + "=" * 78)

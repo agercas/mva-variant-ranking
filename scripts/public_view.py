@@ -4,7 +4,7 @@
 Several checks print more about the child than the report needs: the genes where
 the child has a homozygous change, rsIDs and genotypes of common benign variants,
 every mitochondrial variant (which together give the maternal lineage), and the
-child's phenotype terms. Only what an argument turns on should be published: the
+supplied phenotype terms. Only what an argument turns on should be published: the
 two variants of the diagnosis, the secondary finding, and counts.
 
 This script reads a raw result file on stdin and writes the public view on stdout.
@@ -27,25 +27,9 @@ import sys
 #: Genes that may be named in the public view.
 REPORTED_GENES = {"BUB1B", "LZTR1"}
 
-#: Competing-diagnosis genes the report names. Any other gene in the differential list is
-#: counted but not named, because the list as a whole would show the child's clinical picture.
-NAMED_DIFFERENTIALS = {
-    "HRAS",
-    "CDKN1C",
-    "PTPN11",
-    "SOS1",
-    "RAF1",
-    "KRAS",
-    "NRAS",
-    "BRAF",
-    "MAP2K1",
-    "SHOC2",
-    "CBL",
-    "RIT1",
-    "CEP57",
-    "TRIP13",
-    "BUB1",
-}
+#: Genes linked to MVA, named in the results. Every other gene in the differential list is
+#: counted but not named.
+NAMED_DIFFERENTIALS = {"CEP57", "TRIP13", "BUB1"}
 
 
 class Unexpected(Exception):
@@ -76,28 +60,44 @@ def ranking(text: str) -> str:
     return "\n".join(out) + "\n"
 
 
+def refuse_unredacted_genotypes(text: str) -> None:
+    """Raise if a genotype or an rsID is left on a line that does not start with a reported gene.
+
+    The block heads are recognised by pattern, so a gene symbol of an unexpected shape would
+    otherwise pass through with its variant lines. This is the check that makes the view fail
+    closed.
+    """
+    for line in text.splitlines():
+        if re.search(r"\bGT=\S+|\brs\d{4,}\b", line):
+            words = line.split()
+            if not words or words[0] not in REPORTED_GENES:
+                raise Unexpected("a genotype or rsID is present outside the reported genes")
+
+
 def differential(text: str) -> str:
     """Keep gene-level conclusions; drop rsIDs, genotypes and phenotype hints."""
     lines = text.splitlines()
     out: list[str] = []
     i = 0
     seen_part2 = False
-    block_head = re.compile(r"^([A-Z0-9]+) [—-] (.*)$")
+    block_heads = (re.compile(r"^([A-Z0-9]+) [—-] (.*)$"), re.compile(r"^(\S+) — (.*)$"))
     hidden = {"none": 0, "benign": 0, "unclassified": 0, "pathogenic": 0}
     while i < len(lines):
         line = lines[i]
         # Part 1: drop the per-variant carrier lines, keep BUB1B and LZTR1 and the count.
-        if line.startswith("  ") and re.match(r"^\s+[A-Z0-9]+\s+\d+:\d+ ", line):
+        if line.startswith("  ") and re.match(r"^\s+\S+\s+\d+:\d+ ", line):
             if line.split()[0] in REPORTED_GENES:
                 out.append(re.sub(r"(DP=\d+).*$", r"\1", line).rstrip())
             i += 1
             continue
-        m = block_head.match(line)
+        m = next((h.match(line) for h in block_heads if h.match(line)), None)
         if m and "PART" not in line:
             seen_part2 = True
             gene, desc = m.group(1), m.group(2)
             desc = re.sub(r"\s*-\s*blind rank \d+.*$", "", desc)
-            desc = re.sub(r"\s*\([^)]*(nephrocalcinosis|growth)[^)]*\)", "", desc)
+            if gene not in REPORTED_GENES:
+                # Notes in parentheses on the description of an unreported gene are dropped.
+                desc = re.sub(r"\s*\([^)]*\)", "", desc)
             block = []
             i += 1
             while i < len(lines) and lines[i].strip():
@@ -153,7 +153,9 @@ def differential(text: str) -> str:
         f"{hidden['pathogenic']} carry a pathogenic or likely pathogenic variant.\n"
     )
     result = "\n".join(out).rstrip() + "\n"
-    return result.replace("HIDDEN_SUMMARY\n", summary + "\n") if total else result
+    result = result.replace("HIDDEN_SUMMARY\n", summary + "\n") if total else result
+    refuse_unredacted_genotypes(result)
+    return result
 
 
 def mito(text: str) -> str:
@@ -182,14 +184,15 @@ def mito(text: str) -> str:
     return result
 
 
-#: Diseases the report names in the phenotype ranking. The full top of the list would show
-#: which clinical features the child has, so every other disease is dropped from the tables.
-NAMED_DISEASES = ("Mosaic variegated", "MVA", "Costello", "Beckwith", "Li-Fraumeni")
+#: Diseases named in the phenotype ranking: the MVA series and the related chromosome-instability
+#: disorders. Every other disease is dropped from the tables.
+NAMED_DISEASES = ("Mosaic variegated", "MVA", "Atelis")
 
 
 def keep_named_disease_rows(text: str) -> str:
     """Drop ranking rows for diseases the report does not name; say how many were dropped."""
     row = re.compile(r"^\s+\d+\s+[\d.]+\s+(\S.*)$")
+    marker = "  (other diseases withheld)"
     out: list[str] = []
     dropped = 0
     for line in text.splitlines():
@@ -198,21 +201,24 @@ def keep_named_disease_rows(text: str) -> str:
             dropped += 1
             continue
         if dropped:
-            out.append("  (other diseases withheld)")
+            if not out or out[-1] != marker:
+                out.append(marker)
             dropped = 0
+        if line == marker and out and out[-1] == marker:
+            continue
         out.append(line)
     return "\n".join(out).rstrip() + "\n"
 
 
 def phenotype(text: str) -> str:
-    """Replace the table of the child's terms with the counts the report uses."""
-    if "the child presents with" not in text:
+    """Replace the table of the supplied terms with the counts the report uses."""
+    if "HPO term supplied" not in text:
         raise Unexpected("not a phenotype reverse check")
-    out, skip = [], False
+    out, skip, redacted = [], False, False
     for line in text.splitlines():
-        if line.strip().startswith("the child presents with"):
-            out.append("  (the child's feature names are withheld; counts only)")
-            skip = True
+        if line.strip().startswith("HPO term supplied"):
+            out.append("  (term names are not shown; counts only)")
+            skip = redacted = True
             continue
         if skip:
             if not line.strip():
@@ -220,6 +226,8 @@ def phenotype(text: str) -> str:
                 out.append(line)
             continue
         out.append(line)
+    if not redacted:
+        raise Unexpected("the table of supplied terms was not found, so it was not removed")
     return keep_named_disease_rows("\n".join(out))
 
 

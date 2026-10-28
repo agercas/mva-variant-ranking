@@ -79,7 +79,7 @@
 <text x="238" y="945" class="h">Test other explanations</text>
 <text x="238" y="969" class="l">TOOL</text>
 <text x="296" y="969" class="t">ClinVar sweep, 43-gene panel, aneuploidy and mitochondrial scans, disease-</text>
-<text x="296" y="986" class="t">first and feature-first checks</text>
+<text x="296" y="986" class="t">first and term-first checks</text>
 <text x="238" y="1011" class="l">DOES</text>
 <text x="296" y="1011" class="t">Looks at all 6 pathogenic variants in the genome, competing diagnoses, X, Y,</text>
 <text x="296" y="1028" class="t">mitochondria, whole-chromosome gains and losses.</text>

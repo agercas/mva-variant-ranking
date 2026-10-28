@@ -29,8 +29,8 @@ EMPIRICAL NOISE FLOOR — measured, not assumed
   variants above the floor: 17 (10 homoplasmic, 7 sub-homoplasmic)
 
   5 of 17 calls sit within 25 bp of the circular
-  origin and are discounted as seam artefacts. Excluding them, every
-  remaining call is homoplasmic: 12 variants, no genuine heteroplasmy at all.
+  origin and are discounted as seam artefacts. Excluding them, 12 calls
+  remain.
 
 ==============================================================================
 POSITIVE CONTROL — near-universal rCRS differences
